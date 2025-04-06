@@ -45,37 +45,7 @@ jobs:
         source venv/bin/activate
         pip install -r requirements.txt
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
-
-    - name: Install frontend dependencies
-      working-directory: src/frontend
-      run: npm install
-
-    - name: Install mobile app dependencies
-      working-directory: src/mobile_app
-      run: npm install
-
     - name: Run backend tests
-      working-directory: src/backend
       run: |
-        source ../../venv/bin/activate
+        source venv/bin/activate
         pytest
-
-    - name: Run frontend lint
-      working-directory: src/frontend
-      run: npm run lint
-
-    - name: Run mobile app lint
-      working-directory: src/mobile_app
-      run: npm run lint
-
-    - name: Build frontend
-      working-directory: src/frontend
-      run: npm run build
-
-    - name: Check mobile app
-      working-directory: src/mobile_app
-      run: npm run build

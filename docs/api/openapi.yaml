@@ -1,0 +1,233 @@
+openapi: 3.0.0
+info:
+  title: PlantPal API
+  version: 1.0.0
+  description: API for plant disease detection and care management
+  contact:
+    email: support@plantpal.com
+
+servers:
+  - url: https://api.plantpal.com/v1
+    description: Production server
+  - url: https://staging-api.plantpal.com/v1
+    description: Staging server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "INVALID_INPUT"
+            message:
+              type: string
+              example: "Invalid input parameters"
+            details:
+              type: object
+              example: {"field": "Additional error details"}
+
+    PlantDetectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            plant_name:
+              type: string
+              example: "Tomato"
+            disease:
+              type: string
+              example: "Early Blight"
+            confidence:
+              type: number
+              format: float
+              example: 0.95
+            treatment:
+              type: object
+              properties:
+                recommendations:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Remove infected leaves", "Apply fungicide"]
+                products:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "Organic Fungicide"
+                      type:
+                        type: string
+                        example: "Natural"
+                      application:
+                        type: string
+                        example: "Spray every 7 days"
+
+paths:
+  /plants/detect:
+    post:
+      summary: Detect plant disease from image
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successful detection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlantDetectionResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /plants/{plant_id}/care-schedule:
+    get:
+      summary: Get plant care schedule
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: plant_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      watering_frequency:
+                        type: string
+                        example: "Every 3 days"
+                      sunlight:
+                        type: string
+                        example: "Partial shade"
+                      fertilizer:
+                        type: string
+                        example: "Monthly"
+                      next_tasks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: "watering"
+                            due_date:
+                              type: string
+                              format: date
+                              example: "2024-04-08"
+                            description:
+                              type: string
+                              example: "Water thoroughly"
+
+  /users/profile:
+    put:
+      summary: Update user profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                preferences:
+                  type: object
+                  properties:
+                    notifications:
+                      type: boolean
+                      example: true
+                    language:
+                      type: string
+                      example: "en"
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "user_123"
+                      name:
+                        type: string
+                        example: "John Doe"
+                      email:
+                        type: string
+                        example: "john@example.com"
+                      preferences:
+                        type: object
+                        properties:
+                          notifications:
+                            type: boolean
+                            example: true
+                          language:
+                            type: string
+                            example: "en"
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: "2024-04-05T10:30:00Z" 
